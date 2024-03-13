@@ -17,35 +17,32 @@ def compute_rls_metrics(preds1, preds2, metrics_at=np.array([1,5,10,20,50]), rbo
     rls_rbo = np.zeros((len(metrics_at)))
     rls_jac = np.zeros((len(metrics_at)))
 
-    # Iterate over pairs of predictions in preds1 and preds2
-    for pred1, pred2 in zip(preds1, preds2):
-        # Initialize index variable j and RBO sum variable
+    for pred1,pred2 in zip(preds1,preds2):
         j = 0
         rbo_sum = 0
-
-        # Iterate over the range of positions up to the maximum specified position
-        for d in range(1, max(metrics_at) + 1):
+        for d in range(1,min(min(len(pred1),len(pred2)),max(metrics_at))+1):
             # Create sets of the first d elements from the two ranked lists
             set_pred1, set_pred2 = set(pred1[:d]), set(pred2[:d])
-
+            
             # Calculate the intersection cardinality of the sets
             inters_card = len(set_pred1.intersection(set_pred2))
 
             # Update RBO sum using the formula
-            rbo_sum += rbo_p**(d - 1) * inters_card / d
-
-            # Check if the current position is one of the specified positions
-            if d == metrics_at[j]:
+            rbo_sum += rbo_p**(d-1)*inters_card/d
+            if d==metrics_at[j]:
                 # Update RBO and Jaccard scores at the specified position
-                rls_rbo[j] += (1 - rbo_p) * rbo_sum
-                rls_jac[j] += inters_card / len(set_pred1.union(set_pred2))
-
+                rls_rbo[j] += (1-rbo_p)*rbo_sum/(1-rbo_p**d)
+                        
+                rls_jac[j] += inters_card/len(set_pred1.union(set_pred2))
                 # Move to the next specified position
-                j += 1
-
-    # Create dictionaries with specified positions as keys and normalized scores
-    rbo_dict = {"@" + str(k): rls_rbo[i] / len(preds1) for i, k in enumerate(metrics_at)}
-    jac_dict = {"@" + str(k): rls_jac[i] / len(preds1) for i, k in enumerate(metrics_at)}
-
+                j+=1
+        #Check if it has stopped before cause pred1 or pred2 are shorter
+        if j!=len(metrics_at):
+            for k in range(j,len(metrics_at)):
+                rls_rbo[k] += (1-rbo_p)*rbo_sum
+                rls_jac[k] += inters_card/len(set_pred1.union(set_pred2))
+     # Create dictionaries with specified positions as keys and normalized scores            
+    rbo_dict = {"@"+str(k):rls_rbo[i]/len(preds1) for i,k in enumerate(metrics_at)}
+    jac_dict = {"@"+str(k):rls_jac[i]/len(preds1) for i,k in enumerate(metrics_at)}
     # Return a dictionary containing RBO and Jaccard results
-    return {"RLS_RBO": rbo_dict, "RLS_JAC": jac_dict}
+    return {"RLS_RBO":rbo_dict, "RLS_JAC":jac_dict}
