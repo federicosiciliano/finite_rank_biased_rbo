@@ -52,10 +52,12 @@ For the remaining setting, the one where we remove items at the end of the seque
 
 ## If you use any part of this code please cite us
 ```
-@article{betello2023investigating,
-  title={Investigating the Robustness of Sequential Recommender Systems Against Training Data Perturbations: an Empirical Study},
+@inproceedings{betello2024investigating,
+  title={Investigating the Robustness of Sequential Recommender Systems Against Training Data Perturbations},
   author={Betello, Filippo and Siciliano, Federico and Mishra, Pushkar and Silvestri, Fabrizio},
-  journal={arXiv preprint arXiv:2307.13165},
-  year={2023}
+  booktitle={European Conference on Information Retrieval},
+  pages={205--220},
+  year={2024},
+  organization={Springer}
 }
 ```
